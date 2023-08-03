@@ -27,7 +27,7 @@ class Product
     private ?string $memory = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $system = null;
+    private ?string $os = null;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
@@ -99,14 +99,14 @@ class Product
         return $this;
     }
 
-    public function getSystem(): ?string
+    public function getOs(): ?string
     {
-        return $this->system;
+        return $this->os;
     }
 
-    public function setSystem(string $system): static
+    public function setOs(string $os): static
     {
-        $this->system = $system;
+        $this->os = $os;
 
         return $this;
     }
