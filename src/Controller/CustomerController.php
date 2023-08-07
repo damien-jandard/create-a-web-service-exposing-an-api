@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('api', name: 'app_customer_')]
 class CustomerController extends AbstractController
@@ -26,6 +27,7 @@ class CustomerController extends AbstractController
     }
 
     #[Route('/customer/{id}', name: 'show', methods: [Request::METHOD_GET])]
+    #[IsGranted('CUSTOMER_BELONGS_TO_ME', 'customer', 'Access denied, you do not have the necessary permissions to view this record.')]
     public function showCustomer(Customer $customer, SerializerInterface $serializer): JsonResponse
     {
         $this->denyAccessUnlessGranted('CUSTOMER_BELONGS_TO_ME', $customer, 'Access denied, you do not have the necessary permissions to view this record.');
@@ -48,9 +50,9 @@ class CustomerController extends AbstractController
     }
 
     #[Route('/customer/{id}', name: 'delete', methods: [Request::METHOD_DELETE])]
+    #[IsGranted('CUSTOMER_BELONGS_TO_ME', 'customer', 'Access denied, you do not have the necessary permissions to delete this record.')]
     public function deleteCustomer(Customer $customer, EntityManagerInterface $em): JsonResponse
     {
-        $this->denyAccessUnlessGranted('CUSTOMER_BELONGS_TO_ME', $customer, 'Access denied, you do not have the necessary permissions to delete this record.');
         $em->remove($customer);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
