@@ -48,6 +48,22 @@ class CustomerController extends AbstractController
         return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
     }
 
+    #[Route('/customer/{id}', name: 'update', methods: [Request::METHOD_PUT])]
+    #[IsGranted('CUSTOMER_BELONGS_TO_ME', 'customer', 'Access denied, you do not have the necessary permissions to update this record.')]
+    public function updateCustomer(Customer $customer, Request $request, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
+    {
+        $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+        $customer->setEmail($newCustomer->getEmail())
+            ->setFirstName($newCustomer->getFirstName())
+            ->setLastName($newCustomer->getLastName())
+            ->setUpdatedAt(new \DateTimeImmutable());
+        $em->persist($customer);
+        $em->flush();
+        $context = SerializationContext::create()->setGroups('getCustomers');
+        $jsonCustomer = $serializer->serialize($customer, 'json', $context);
+        return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
+    }
+
     #[Route('/customer/{id}', name: 'delete', methods: [Request::METHOD_DELETE])]
     #[IsGranted('CUSTOMER_BELONGS_TO_ME', 'customer', 'Access denied, you do not have the necessary permissions to delete this record.')]
     public function deleteCustomer(Customer $customer, EntityManagerInterface $em): JsonResponse
