@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\CustomerRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
+use App\Repository\CustomerRepository;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 class Customer
@@ -11,6 +12,7 @@ class Customer
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getCustomers"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'customers')]
@@ -18,18 +20,23 @@ class Customer
     private ?User $owner = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getCustomers"])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getCustomers"])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getCustomers"])]
     private ?string $lastName = null;
 
     #[ORM\Column]
+    #[Groups(["getCustomers"])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(["getCustomers"])]
     private ?\DateTimeImmutable $updatedAt = null;
 
     public function __construct()
