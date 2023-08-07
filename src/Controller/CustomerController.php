@@ -46,4 +46,13 @@ class CustomerController extends AbstractController
         $jsonCustomer = $serializer->serialize($customer, 'json', $context);
         return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
     }
+
+    #[Route('/customer/{id}', name: 'delete', methods: [Request::METHOD_DELETE])]
+    public function deleteCustomer(Customer $customer, EntityManagerInterface $em): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('CUSTOMER_BELONGS_TO_ME', $customer, 'Access denied, you do not have the necessary permissions to delete this record.');
+        $em->remove($customer);
+        $em->flush();
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
 }
