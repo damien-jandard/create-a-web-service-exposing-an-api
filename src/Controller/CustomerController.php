@@ -12,7 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('api', name: 'app_customer_')]
 class CustomerController extends AbstractController
@@ -36,9 +39,13 @@ class CustomerController extends AbstractController
     }
 
     #[Route('/customer', name: 'add', methods: [Request::METHOD_POST])]
-    public function addCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
+    public function addCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+        $errors = $validator->validate($customer);
+        if ($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
         $customer->setOwner($this->getUser())
             ->setCreatedAt(new \DateTimeImmutable());
         $em->persist($customer);
@@ -50,9 +57,13 @@ class CustomerController extends AbstractController
 
     #[Route('/customer/{id}', name: 'update', methods: [Request::METHOD_PUT])]
     #[IsGranted('CUSTOMER_BELONGS_TO_ME', 'customer', 'Access denied, you do not have the necessary permissions to update this record.')]
-    public function updateCustomer(Customer $customer, Request $request, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
+    public function updateCustomer(Customer $customer, Request $request, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+        $errors = $validator->validate($newCustomer);
+        if ($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
         $customer->setEmail($newCustomer->getEmail())
             ->setFirstName($newCustomer->getFirstName())
             ->setLastName($newCustomer->getLastName())
