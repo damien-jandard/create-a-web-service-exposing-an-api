@@ -16,19 +16,31 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('api', name: 'app_customer_')]
 class CustomerController extends AbstractController
 {
     #[Route('/customers', name: 'list', methods: [Request::METHOD_GET])]
-    public function getAllCustomers(CustomerRepository $customerRepository, SerializerInterface $serializer, Request $request, PaginatorInterface $paginator): JsonResponse
+    public function getAllCustomers(CustomerRepository $customerRepository, SerializerInterface $serializer, Request $request, PaginatorInterface $paginator, TagAwareCacheInterface $tagAwareCache): JsonResponse
     {
-        $customerList = $paginator->paginate(
-            $customerRepository->findAllWithPagination($this->getUser()), 
-            (int) $request->get('page', 1),
-            (int) $request->get('limit', 5)
+        $page = (int) $request->get('page', 1);
+        $limit = (int) $request->get('limit', 5);
+        $idCache = 'listOfCustomers-' . (int) $request->get('page', 1) . '-' . (int) $request->get('limit', 5);
+        $customerList = $tagAwareCache->get(
+            $idCache,
+            function (ItemInterface $item) use ($paginator, $customerRepository, $page, $limit) 
+            {
+                $item->tag('customersCache');
+                return $paginator->paginate(
+                    $customerRepository->findAllWithPagination($this->getUser()), 
+                    $page,
+                    $limit
+                );
+            }
         );
-        if ((int) $request->get('page', 1) > ceil($customerList->getTotalItemCount() / 5)) {
+        if ($page > ceil($customerList->getTotalItemCount() / 5)) {
             throw new HttpException(JsonResponse::HTTP_NOT_FOUND, 'The requested page does not exist.');
         }
         $context = SerializationContext::create()->setGroups('getCustomers');
@@ -46,8 +58,9 @@ class CustomerController extends AbstractController
     }
 
     #[Route('/customer', name: 'add', methods: [Request::METHOD_POST])]
-    public function addCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
+    public function addCustomer(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $tagAwareCache): JsonResponse
     {
+        $tagAwareCache->invalidateTags(['customersCache']);
         $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
         $errors = $validator->validate($customer);
         if ($errors->count() > 0) {
@@ -64,8 +77,9 @@ class CustomerController extends AbstractController
 
     #[Route('/customer/{id}', name: 'update', methods: [Request::METHOD_PUT])]
     #[IsGranted('CUSTOMER_BELONGS_TO_ME', 'customer', 'Access denied, you do not have the necessary permissions to update this record.')]
-    public function updateCustomer(Customer $customer, Request $request, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
+    public function updateCustomer(Customer $customer, Request $request, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $tagAwareCache): JsonResponse
     {
+        $tagAwareCache->invalidateTags(['customersCache']);
         $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
         $errors = $validator->validate($newCustomer);
         if ($errors->count() > 0) {
@@ -84,8 +98,9 @@ class CustomerController extends AbstractController
 
     #[Route('/customer/{id}', name: 'delete', methods: [Request::METHOD_DELETE])]
     #[IsGranted('CUSTOMER_BELONGS_TO_ME', 'customer', 'Access denied, you do not have the necessary permissions to delete this record.')]
-    public function deleteCustomer(Customer $customer, EntityManagerInterface $em): JsonResponse
+    public function deleteCustomer(Customer $customer, EntityManagerInterface $em, TagAwareCacheInterface $tagAwareCache): JsonResponse
     {
+        $tagAwareCache->invalidateTags(['customersCache']);
         $em->remove($customer);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);

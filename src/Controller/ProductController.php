@@ -13,19 +13,32 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('api', name: 'app_product_')]
 class ProductController extends AbstractController
 {
     #[Route('/products', name: 'list', methods: [Request::METHOD_GET])]
-    public function list(ProductRepository $productRepository, SerializerInterface $serializer, Request $request, PaginatorInterface $paginator): JsonResponse
+    public function list(ProductRepository $productRepository, SerializerInterface $serializer, Request $request, PaginatorInterface $paginator, TagAwareCacheInterface $tagAwareCache): JsonResponse
     {
-        $productList = $paginator->paginate(
-            $productRepository->findAllWithPagination(), 
-            (int) $request->get('page', 1),
-            (int) $request->get('limit', 5)
+        $page = (int) $request->get('page', 1);
+        $limit = (int) $request->get('limit', 5);
+        $idCache = 'listOfProducts-' . (int) $request->get('page', 1) . '-' . (int) $request->get('limit', 5);
+        $productList = $tagAwareCache->get(
+            $idCache,
+            function (ItemInterface $item) use ($paginator, $productRepository, $page, $limit) 
+            {
+                $item->tag('productsCache')
+                    ->expiresAfter(3600);
+                return $paginator->paginate(
+                    $productRepository->findAllWithPagination(), 
+                    $page,
+                    $limit
+                );
+            }
         );
-        if ((int) $request->get('page', 1) > ceil($productList->getTotalItemCount() / 5)) {
+        if ($page > ceil($productList->getTotalItemCount() / 5)) {
             throw new HttpException(JsonResponse::HTTP_NOT_FOUND, 'The requested page does not exist.');
         }
         $context = SerializationContext::create()->setGroups('getProducts');
