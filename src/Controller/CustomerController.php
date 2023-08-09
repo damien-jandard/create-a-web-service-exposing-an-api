@@ -7,6 +7,7 @@ use App\Repository\CustomerRepository;
 use JMS\Serializer\SerializerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,18 +15,24 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('api', name: 'app_customer_')]
 class CustomerController extends AbstractController
 {
     #[Route('/customers', name: 'list', methods: [Request::METHOD_GET])]
-    public function getAllCustomers(CustomerRepository $customerRepository, SerializerInterface $serializer): JsonResponse
+    public function getAllCustomers(CustomerRepository $customerRepository, SerializerInterface $serializer, Request $request, PaginatorInterface $paginator): JsonResponse
     {
-        $customerList = $customerRepository->findBy(['owner' => $this->getUser()]);
+        $customerList = $paginator->paginate(
+            $customerRepository->findAllWithPagination($this->getUser()), 
+            (int) $request->get('page', 1),
+            (int) $request->get('limit', 5)
+        );
+        if ((int) $request->get('page', 1) > ceil($customerList->getTotalItemCount() / 5)) {
+            throw new HttpException(JsonResponse::HTTP_NOT_FOUND, 'The requested page does not exist.');
+        }
         $context = SerializationContext::create()->setGroups('getCustomers');
-        $jsonCustomersList = $serializer->serialize($customerList, 'json', $context);
+        $jsonCustomersList = $serializer->serialize($customerList->getItems(), 'json', $context);
         return new JsonResponse($jsonCustomersList, Response::HTTP_OK, [], true);
     }
 
