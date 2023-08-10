@@ -103,7 +103,7 @@ class CustomerFixtures extends Fixture implements DependentFixtureInterface
                 ->setLastName($c['lastName']);
             $manager->persist($customer);
         }
-        
+
         $manager->flush();
     }
 

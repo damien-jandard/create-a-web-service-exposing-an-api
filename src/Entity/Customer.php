@@ -11,19 +11,19 @@ use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
  * @Serializer\XmlRoot("customer")
- * 
+ *
  * @Hateoas\Relation(
  *      "self",
  *      href = "expr('/api/customer/' ~ object.getId())",
  *      exclusion = @Hateoas\Exclusion(groups="getCustomers")
  * )
- * 
+ *
  * @Hateoas\Relation(
  *      "update",
  *      href = "expr('/api/customer/' ~ object.getId())",
  *      exclusion = @Hateoas\Exclusion(groups="getCustomers")
  * )
- * 
+ *
  * @Hateoas\Relation(
  *      "delete",
  *      href = "expr('/api/customer/' ~ object.getId())",
