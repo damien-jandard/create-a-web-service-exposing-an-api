@@ -72,18 +72,16 @@ class CustomerController extends AbstractController
         Request $request,
         PaginatorInterface $paginator,
         TagAwareCacheInterface $tagAwareCache
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $page = (int) $request->get('page', 1);
         $limit = (int) $request->get('limit', 5);
         $idCache = 'listOfCustomers-' . $page . '-' . $limit;
         $customerList = $tagAwareCache->get(
             $idCache,
-            function (ItemInterface $item) use ($paginator, $customerRepository, $page, $limit) 
-            {
+            function (ItemInterface $item) use ($paginator, $customerRepository, $page, $limit) {
                 $item->tag('customersCache');
                 return $paginator->paginate(
-                    $customerRepository->findAllWithPagination($this->getUser()), 
+                    $customerRepository->findAllWithPagination($this->getUser()),
                     $page,
                     $limit
                 );
@@ -140,8 +138,7 @@ class CustomerController extends AbstractController
     public function showCustomer(
         Customer $customer,
         SerializerInterface $serializer
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $context = SerializationContext::create()->setGroups('getCustomers');
         $jsonCustomer = $serializer->serialize($customer, 'json', $context);
         return new JsonResponse(
@@ -184,8 +181,7 @@ class CustomerController extends AbstractController
         EntityManagerInterface $em,
         ValidatorInterface $validator,
         TagAwareCacheInterface $tagAwareCache
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $tagAwareCache->invalidateTags(['customersCache']);
         $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
         $errors = $validator->validate($customer);
@@ -258,8 +254,7 @@ class CustomerController extends AbstractController
         EntityManagerInterface $em,
         ValidatorInterface $validator,
         TagAwareCacheInterface $tagAwareCache
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $tagAwareCache->invalidateTags(['customersCache']);
         $newCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
         $errors = $validator->validate($newCustomer);
@@ -317,8 +312,7 @@ class CustomerController extends AbstractController
         Customer $customer,
         EntityManagerInterface $em,
         TagAwareCacheInterface $tagAwareCache
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $tagAwareCache->invalidateTags(['customersCache']);
         $em->remove($customer);
         $em->flush();

@@ -69,19 +69,17 @@ class ProductController extends AbstractController
         Request $request,
         PaginatorInterface $paginator,
         TagAwareCacheInterface $tagAwareCache
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $page = (int) $request->get('page', 1);
         $limit = (int) $request->get('limit', 5);
         $idCache = 'listOfProducts-' . $page . '-' . $limit;
         $productList = $tagAwareCache->get(
             $idCache,
-            function (ItemInterface $item) use ($paginator, $productRepository, $page, $limit) 
-            {
+            function (ItemInterface $item) use ($paginator, $productRepository, $page, $limit) {
                 $item->tag('productsCache')
                     ->expiresAfter(3600);
                 return $paginator->paginate(
-                    $productRepository->findAllWithPagination(), 
+                    $productRepository->findAllWithPagination(),
                     $page,
                     $limit
                 );
@@ -129,8 +127,7 @@ class ProductController extends AbstractController
     public function showProduct(
         Product $product,
         SerializerInterface $serializer
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $context = SerializationContext::create()->setGroups('getProducts');
         $jsonProduct = $serializer->serialize($product, 'json', $context);
         return new JsonResponse(
