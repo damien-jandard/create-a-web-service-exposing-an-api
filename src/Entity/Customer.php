@@ -44,7 +44,7 @@ class Customer
     private ?User $owner = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getCustomers"])]
+    #[Groups(["getCustomers", "addCustomer", "updateCustomer"])]
     #[Assert\NotBlank(
         message: "The customer's email address is required."
     )]
@@ -54,7 +54,7 @@ class Customer
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getCustomers"])]
+    #[Groups(["getCustomers", "addCustomer", "updateCustomer"])]
     #[Assert\NotBlank(
         message: "The customer's first name is required."
     )]
@@ -67,7 +67,7 @@ class Customer
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["getCustomers"])]
+    #[Groups(["getCustomers", "addCustomer", "updateCustomer"])]
     #[Assert\NotBlank(
         message: "The customer's last name is required."
     )]
