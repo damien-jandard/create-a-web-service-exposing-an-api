@@ -2,6 +2,8 @@
 
 Project number seven completed as part of my OpenClassrooms training.
 
+[![SymfonyInsight](https://insight.symfony.com/projects/6c27031b-caa5-495e-9348-24ac6e21e3d9/big.svg)](https://insight.symfony.com/projects/6c27031b-caa5-495e-9348-24ac6e21e3d9)
+
 ### Requirements
 
  * PHP 8.1
