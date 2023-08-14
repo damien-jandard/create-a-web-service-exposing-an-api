@@ -104,7 +104,7 @@ class ProductController extends AbstractController
     /**
      * Display the details of a product.
      */
-    #[Route('/product/{id}', name: 'show', methods: [Request::METHOD_GET])]
+    #[Route('/products/{id}', name: 'show', methods: [Request::METHOD_GET])]
     #[OA\Parameter(
         name: 'id',
         in: 'path',
