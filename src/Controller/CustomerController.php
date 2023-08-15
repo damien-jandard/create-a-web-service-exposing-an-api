@@ -107,7 +107,7 @@ class CustomerController extends AbstractController
      * Display the details of a customer.
      */
     #[Route(
-        '/customer/{id}',
+        '/customers/{id}',
         name: 'show',
         methods: [Request::METHOD_GET]
     )]
@@ -153,7 +153,7 @@ class CustomerController extends AbstractController
      * Add a customer.
      */
     #[Route(
-        '/customer',
+        '/customers',
         name: 'add',
         methods: [Request::METHOD_POST]
     )]
@@ -211,7 +211,7 @@ class CustomerController extends AbstractController
      * Update a customer.
      */
     #[Route(
-        '/customer/{id}',
+        '/customers/{id}',
         name: 'update',
         methods: [Request::METHOD_PUT]
     )]
@@ -286,7 +286,7 @@ class CustomerController extends AbstractController
      * Delete a customer.
      */
     #[Route(
-        '/customer/{id}',
+        '/customers/{id}',
         name: 'delete',
         methods: [Request::METHOD_DELETE]
     )]

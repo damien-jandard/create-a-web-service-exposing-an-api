@@ -10,11 +10,11 @@ use JMS\Serializer\Annotation as Serializer;
 use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
- * @Serializer\XmlRoot("product")
+ * @Serializer\XmlRoot("products")
  *
  * @Hateoas\Relation(
  *      "self",
- *      href = "expr('/api/product/' ~ object.getId())",
+ *      href = "expr('/api/products/' ~ object.getId())",
  *      exclusion = @Hateoas\Exclusion(groups="getProducts")
  * )
  */

@@ -10,23 +10,23 @@ use JMS\Serializer\Annotation as Serializer;
 use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
- * @Serializer\XmlRoot("customer")
+ * @Serializer\XmlRoot("customers")
  *
  * @Hateoas\Relation(
  *      "self",
- *      href = "expr('/api/customer/' ~ object.getId())",
+ *      href = "expr('/api/customers/' ~ object.getId())",
  *      exclusion = @Hateoas\Exclusion(groups="getCustomers")
  * )
  *
  * @Hateoas\Relation(
  *      "update",
- *      href = "expr('/api/customer/' ~ object.getId())",
+ *      href = "expr('/api/customers/' ~ object.getId())",
  *      exclusion = @Hateoas\Exclusion(groups="getCustomers")
  * )
  *
  * @Hateoas\Relation(
  *      "delete",
- *      href = "expr('/api/customer/' ~ object.getId())",
+ *      href = "expr('/api/customers/' ~ object.getId())",
  *      exclusion = @Hateoas\Exclusion(groups="getCustomers")
  * )
  */

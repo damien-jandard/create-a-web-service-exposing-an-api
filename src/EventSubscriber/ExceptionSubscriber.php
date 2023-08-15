@@ -14,10 +14,17 @@ class ExceptionSubscriber implements EventSubscriberInterface
     {
         $exception = $event->getThrowable();
         if ($exception instanceof HttpException) {
-            $data = [
-                'status' => $exception->getStatusCode(),
-                'message' => $exception->getMessage()
-            ];
+            if ($event->getRequest()->get('id') && !ctype_digit($event->getRequest()->get('id'))) {
+                $data = [
+                    'status' => 400,
+                    'message' => 'The expected parameter must be of integer type.'
+                ];
+            } else {
+                $data = [
+                    'status' => $exception->getStatusCode(),
+                    'message' => $exception->getMessage()
+                ];
+            }
         } else {
             $data = [
                 'status' => 500,
