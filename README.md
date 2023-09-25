@@ -12,7 +12,7 @@ Project number seven completed as part of my OpenClassrooms training.
  
 ## Install
 
-1. In your terminal, execute the following command to clone the project into the "blog" directory.
+1. In your terminal, execute the following command to clone the project into the "bilemo" directory.
 ```shell
 git clone https://github.com/damien-jandard/create-a-web-service-exposing-an-api.git bilemo
 ```
